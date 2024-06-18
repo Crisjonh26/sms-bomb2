@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+  <meta charset="UTF-8">
+  <head>
+    <title>SmsBomb</title>
+    <style>
+      body{
+        background: #8fbc8f;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .container{
+        border: 1.2px solid #000;
+        padding: 40px 20px;
+        background:linear-gradient(150deg,#ffabbe,#edf7f6);
+        position: absolute;
+        border-radius: 20px 20px;
+        box-shadow: 1px 4px 8px rgba(0,0,0,0.3);
+      }
+      .console{
+        margin-top: 5px;
+        background-color: #f0f2f5;
+        height: 15vh;
+        color: #00e678;
+        border-radius: 10px;
+        border: 1px solid #000;
+        padding: 10px;
+        text-align: right;
+        font-size: 10px;
+        overflow-y: auto;
+      }
+      .console p{
+        animation: slide-up 0.5s ease;
+      }
+      input, button{
+        position: relative;
+        display:block;
+        margin: 0 auto;
+        border-radius: 10px 10px;
+        border: 1px solid #000;
+        padding: 10px 20px;
+      }
+      h2{
+        text-align: center;
+        text-shadow: 1px 1px #00bfff ;
+      }
+      button{
+        margin-top:10px;
+        font-size: 17px;
+        cursor: pointer;
+        transition: background-color 0.3;
+        background: linear-gradient(150deg,#add8e6,#ff69b4);
+      }
+      button:hover{
+        background-color: #ff69b4;
+      }
+      @keyframes slide-up{
+        from{
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to{
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      p{
+        color: #8a8d9d;
+        font-size: 10px;
+        text-align: center;
+      }
+      @media only screen and(max-width:500px){
+        body{
+          margin: 10px;
+        }
+      }
+    </style>
+    <body>
+      <div class="container">
+        <form id="smsbomb">
+        <h2>SmsBomb</h2>
+        <p>POWERED BY CRISJHON DEGUIÑON</p>
+        <hr>
+        <br>
+        <input type="Number" id="Number" placeholder="Enter Your Phone Number..." required>
+        <br>
+        <input type="Number" id="Amount" placeholder="Enter Your Amount..." required>
+        <br>
+        <input type="Number" id="Cooldown" placeholder="Enter The Cooldown..." required>
+        <button type="submit">Start</button>
+        </form>
+        <div class="console" id="console"></div>
+        <script>
+          document.getElementById('smsbomb').addEventListener('submit',async function (event) {
+            event.preventDefult();
+            const phone = document.getElementById('Number').value;
+            const amount = document.getElementById('Amount').value;
+            const cooldown = document.getElementById('Cooldown').value;
+            const console = document.getElementById('console').value;
+            let successes = 0;
+            let failures = 0;
+            const response = await fetch('/start', {
+              method: 'POST',
+              header: {
+                'Content-Type': 'application/json'
+                
+              },
+              body: JSON.stringtify({Number, Amount, Cooldown})
+            });
+            const eventSource = new eventSource('events');
+            eventSource.onmessage = function(event) {
+              const data = JSON.parse(event.data);
+              if (data.success) {
+                successes++;
+                consoleDiv.innerHTML += '<p class="success">Successs: ${JSON.stringtify(data.message)}</p>';
+              } else {
+                failures++;
+                consoleDiv.innerHTML += '<p class="failure">Failure: ${JSON.stringtify(data.message)}</p>';
+              }
+              consoleDiv.scrollTop = consoleDiv.scrollHeight;
+              if (successes + failures === parseInt(Amount)){
+                consoleDiv.innerHTML += '<p class="summary">Total attemps: ${Amount},Successful: ${successes}, Failed: ${failures}</p>';
+                eventSource.close();
+             }
+            };
+          });
+        </script>
+      </div>
+    </body>
+  </head>
+</html> 
